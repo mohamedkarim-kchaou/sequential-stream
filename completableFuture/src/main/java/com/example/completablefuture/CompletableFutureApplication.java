@@ -41,12 +41,14 @@ public class CompletableFutureApplication {
     studentsMarks.put(thirdStudent, List.of(1., 4., 5., 5., 5.));
     studentsMarks.put(fourthStudent, List.of(1., 2.5, 3.5, 4., 0.));
     studentsMarks.put(fifthStudent, List.of(5., 2., 3., 5., 5.));
+    ExecutorService threadPool = Executors.newFixedThreadPool(students.size());
     List<CompletableFuture<Void>> completableFutures = students.stream()
-            .map(student -> CompletableFuture.runAsync(new AverageRunnable(student, studentsMarks.get(student))))
+            .map(student -> CompletableFuture.runAsync(new AverageRunnable(student, studentsMarks.get(student)), threadPool))
             .collect(Collectors.toList());
     CompletableFuture.allOf(completableFutures.get(0), completableFutures.get(1),
             completableFutures.get(2), completableFutures.get(3), completableFutures.get(4));
     students.forEach(
         student -> System.out.println(student.name + " " + studentsAverage.get(student)));
+    threadPool.shutdown();
   }
 }
